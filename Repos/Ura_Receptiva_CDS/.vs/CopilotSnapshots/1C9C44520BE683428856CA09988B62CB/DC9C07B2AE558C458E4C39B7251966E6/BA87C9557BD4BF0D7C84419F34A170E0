@@ -1,0 +1,124 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+namespace Ura_Receptiva_CDS
+{
+    public partial class Transfer : System.Web.UI.Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+
+        }
+        
+        public string GetTransfer()
+        {
+            var servico = "85"; // Sempre 85
+            var campanha = ObterCampanha();
+            var index = ObterIndex();
+
+            return $"<milestone name=\"Transfer\" index=\"{index}\"/>" + Environment.NewLine +
+                   $"<transfer dest=\"{servico}\" info=\"{campanha}\" />";
+        }
+
+        private string ObterCampanha()
+        {                               
+            var menu = Request.QueryString["menu"];
+            var opcao = Request.QueryString["opcao"];
+
+            // Mapeamento de campanhas
+            var campanhas = new Dictionary<string, Dictionary<string, string>>
+            {
+                ["publico"] = new Dictionary<string, string>
+                {
+                    ["1"] = "945",
+                    ["5"] = "946",
+                    ["6"] = "947"
+                },
+                ["gradpresencial"] = new Dictionary<string, string>
+                {
+                    ["1"] = "948",
+                    ["2"] = "949",
+                    ["3"] = "950"
+                },
+                ["cursoadistancia"] = new Dictionary<string, string>
+                {
+                    ["1"] = "951",
+                    ["2"] = "952",
+                    ["3"] = "950"
+                },
+                ["posgraduacao"] = new Dictionary<string, string>
+                {
+                    ["1"] = "953",
+                    ["2"] = "954",
+                    ["3"] = "955"
+                }
+            };
+
+            // Busca a campanha
+            if (!string.IsNullOrEmpty(menu) && !string.IsNullOrEmpty(opcao))
+            {
+                if (campanhas.ContainsKey(menu.ToLower()) && 
+                    campanhas[menu.ToLower()].ContainsKey(opcao))
+                {
+                    return campanhas[menu.ToLower()][opcao];
+                }
+            }
+
+            // Fallback: campanha padrão ou "0"
+            return ConfigurationManager.AppSettings["CampanhaWorkingHours"] ?? "0";
+        }
+
+        private string ObterIndex()
+        {
+            var menu = Request.QueryString["menu"];
+            var opcao = Request.QueryString["opcao"];
+
+            // Mapeamento de índices
+            var indices = new Dictionary<string, Dictionary<string, string>>
+            {
+                ["publico"] = new Dictionary<string, string>
+                {
+                    ["1"] = "8",   // MenuPublicoGeral - op1 (Medicina)
+                    ["5"] = "12",  // MenuPublicoGeral - op5 (Cursos Técnicos)
+                    ["6"] = "13"   // MenuPublicoGeral - op6 (Cursos Livres)
+                },
+                ["gradpresencial"] = new Dictionary<string, string>
+                {
+                    ["1"] = "19",  // MenuGraduacaoPresencial - op1 (2ª Graduação/Transferência)
+                    ["2"] = "20",  // MenuGraduacaoPresencial - op2 (Formas de Ingresso)
+                    ["3"] = "21"   // MenuGraduacaoPresencial - op3 (Programas Estudantis)
+                },
+                ["cursoadistancia"] = new Dictionary<string, string>
+                {
+                    ["1"] = "26",  // MenuCursoADistancia - op1 (2ª Graduação/Transferência)
+                    ["2"] = "27",  // MenuCursoADistancia - op2 (Formas de Ingresso)
+                    ["3"] = "28"   // MenuCursoADistancia - op3 (Programas Estudantis)
+                },
+                ["posgraduacao"] = new Dictionary<string, string>
+                {
+                    ["1"] = "33",  // MenuPosGraduacao - op1 (EAD)
+                    ["2"] = "34",  // MenuPosGraduacao - op2 (Presencial)
+                    ["3"] = "35"   // MenuPosGraduacao - op3 (Doutorado/Mestrado)
+                }
+            };
+
+            // Busca o índice
+            if (!string.IsNullOrEmpty(menu) && !string.IsNullOrEmpty(opcao))
+            {
+                if (indices.ContainsKey(menu.ToLower()) && 
+                    indices[menu.ToLower()].ContainsKey(opcao))
+                {
+                    return indices[menu.ToLower()][opcao];
+                }
+            }
+
+            // Fallback
+            return "04";
+        }
+    }
+}
